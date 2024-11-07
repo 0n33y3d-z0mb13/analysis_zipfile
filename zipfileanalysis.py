@@ -1,3 +1,6 @@
+import os
+import re
+
 # 시그니처 선언
 eocdr_signature = b'\x50\x4b\x05\x06'   # End of Central Directory Record (EOCDR)
 cdfh_signature = b'\x50\x4b\x01\x02'    # Central directory file header (CDFH)
@@ -5,8 +8,8 @@ lfh_signature = b'\x50\x4b\x03\x04'     # Local File Header (LFH)
 
 # 오프셋 및 데이터 저장 변수 선언
 eocdr_offset = 0
-cdfh_offsets = []        # CHD는 여러개일 수 있으므로 리스트로 저장
-lfh_offsets = []        # LFH는 여러개일 수 있으므로 리스트로 저장
+cdfh_offsets = []
+lfh_offsets = []
 
 eocdr_data = b''
 cdfh_datas = []
@@ -112,19 +115,19 @@ def calc_date(ms_date):
 def find_parts(data):
     global eocdr_offset, eocdr_data, cdfh_offsets, cdfh_datas, lfh_offsets, lfh_datas
 
-    # EOCDR 위치 찾기, 데이터 저장
+    # EOCDR 위치 찾기(1개), 데이터 저장
     eocdr_offset = data.rfind(eocdr_signature)
     eocdr_data = data[eocdr_offset:]
 
-    # cdfh 위치 찾기: 여러개일 수 있음
+    # cdfh 위치 찾기(파일 개수만큼)
     cdfh_offset = 0
     while True:
         cdfh_offset = data.find(cdfh_signature, cdfh_offset)
         if cdfh_offset == -1:
             break
         cdfh_offsets.append(cdfh_offset)
-        cdfh_offset += 1
-
+        cdfh_offset += len(cdfh_signature)
+    print(cdfh_offsets)
     for i in range(len(cdfh_offsets) - 1):
         cdfh_datas.append(data[cdfh_offsets[i]:cdfh_offsets[i + 1]])
     cdfh_datas.append(data[cdfh_offsets[-1]:eocdr_offset])    # EOCDR 시작 전까지
@@ -208,7 +211,6 @@ def analysis_lfh(data):
     file_data = ''
     file_size = ''
     print('\033[92m[*] Checking Local File Header:\033[0m')
-    print() 
     for lfh_data in lfh_datas:
         index = lfh_datas.index(lfh_data)
         lfh_fields = [
@@ -274,14 +276,15 @@ def analysis_lfh(data):
                     comp_method_meaning = compression_methods.get(comp_method, "unknown")
                     print(f'| {field["name"]:<25} | {field["size"]:<11} | {hex_values:<38} | {comp_method}: {comp_method_meaning:<35} |')
                 elif field['name'] == "GPB flag":
-                    # 각 비트당 설정되어 있는 값을 gpb_flags에서 가져와 출력
                     gpb_flag = int.from_bytes(field['value'], 'little')
                     for bit in range(16):
                         if gpb_flag & (1 << bit):
                             flag_description = gpb_flags[bit]
                             if flag_description:
                                 flag_descriptions += flag_description + ' '
-                    print(f'| {field["name"]:<25} | {field["size"]:<11} | {hex_values:<38} | {gpb_flag:016b}: {flag_descriptions:<20} |')
+                            else:
+                                flag_descriptions = "-"
+                    print(f'| {field["name"]:<25} | {field["size"]:<11} | {hex_values:<38} | {flag_descriptions:<38} |')
                 elif field['name'] == "Mod time":
                     hours, minutes, seconds = calc_time(field['value'])
                     print(f'| {field["name"]:<25} | {field["size"]:<11} | {hex_values:<38} | {hours}:{minutes}:{seconds:<32} |')
@@ -405,7 +408,9 @@ def analysis_cdfh(data):
                             flag_description = gpb_flags[bit]
                             if flag_description:
                                 flag_descriptions += flag_description + ' '
-                    print(f'| {field["name"]:<25} | {field["size"]:<11} | {hex_values:<38} | {gpb_flag:016b}: {flag_descriptions:<20} |')
+                            else:
+                                flag_descriptions = "-"
+                    print(f'| {field["name"]:<25} | {field["size"]:<11} | {hex_values:<38} | {flag_descriptions:<38} |')
                 elif field['name'] == "Mod time":
                     hours, minutes, seconds = calc_time(field['value'])
                     print(f'| {field["name"]:<25} | {field["size"]:<11} | {hex_values:<38} | {hours}:{minutes}:{seconds:<32} |')
@@ -492,11 +497,53 @@ def analysis_eocdr(data):
 
 if __name__ == '__main__':
     data = b''
-    with open('testfile.zip', 'rb') as f:
-        data += f.read()
+    
+    # 안전한 실행을 위하여, 파이썬 실행 파일과 같은 위치에 있는 파일만 실행하도록 한다.
+    filename = input("[*] Enter the name of the ZIP file (without extension): ")
+        
+    # 외부 입력 검증
+    if not filename.isalnum():
+        print("[*] Error: The filename should only contain alphanumeric characters.")
+        print("[-] Program will be terminated.")
+        exit(1)
+
+    # 입력 길이 제한
+    if len(filename) == 0:
+        print("[*] Error: The filename cannot be empty.")
+        print("[-] Program will be terminated.")
+        exit(1)
+
+    if len(filename) > 255:
+        print("[*] Error: The filename is too long.")
+        print("[-] Program will be terminated.")
+        exit(1)
+
+    # 파일 경로 조작 방지
+    safe_filename = os.path.join(os.getcwd(), filename + '.zip')
+
+    try:
+        with open(safe_filename, 'rb') as f:
+            data += f.read()
+    except FileNotFoundError:
+        print(f"[*] Error: The file '{filename}.zip' does not exist in this folder.")
+        print(f"[-] Program will be terminated.")
+        exit(1)
+    except PermissionError:
+        print(f"[*] Error: Permission denied while trying to read the file '{filename}.zip'.")
+        print(f"[-] Program will be terminated.")
+        exit(1)
+    except IsADirectoryError:
+        print(f"[*] Error: '{filename}.zip' is a directory, not a file.")
+        print(f"[-] Program will be terminated.")
+        exit(1)
+    except Exception as e:
+        print(f"[*] Error: An unexpected error occurred while reading the file: {e}")
+        print(f"[-] Program will be terminated.")
+        exit(1)
 
     find_parts(data)
     hexdump(data)
     analysis_lfh(data)
     analysis_cdfh(data)
     analysis_eocdr(data)
+
