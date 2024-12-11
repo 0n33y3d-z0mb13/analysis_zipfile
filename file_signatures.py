@@ -1,30 +1,38 @@
-file_signatures = {
-    "jpg": "FFD8FF",
-    "png": "89504E47",
-    "gif": "47494638",
-    "pdf": "25504446",
-    "zip": "504B0304",
-    "rar": "52617221",
-    "7z": "377ABCAF271C",
-    "exe": "4D5A",
-    "bmp": "424D",
-    "mp3": "494433",
-    "wav": "52494646",
-    "avi": "52494646",
-    "mp4": "00000020667479706D70",
-    "mov": "00000014667479707174",
-    "html": "3C21444F435459504520",
-    "xml": "3C3F786D6C20",
-    "json": "7B",
-    "tar": "7573746172",
-    "gz": "1F8B08",
-    "bz2": "425A68",
-    "iso": "4344303031",
-    "sqlite": "53514C69746520666F726D6174203300",
-    "doc": "D0CF11E0A1B11AE1",
-    "docx": "504B030414000600",
-    "xls": "D0CF11E0A1B11AE1",
-    "xlsx": "504B030414000600",
-    "ppt": "D0CF11E0A1B11AE1",
-    "pptx": "504B030414000600"
+signature_to_extension = {
+    b'\x50\x4B\x03\x04': 'zip',  # ZIP 파일
+    b'\x50\x4B\x05\x06': 'zip',  # ZIP 파일 (empty archive)
+    b'\x50\x4B\x07\x08': 'zip',  # ZIP 파일 (spanned archive)
+    b'\x25\x50\x44\x46': 'pdf',  # PDF 파일
+    b'\xFF\xD8\xFF': 'jpg',      # JPEG 파일
+    b'\x89\x50\x4E\x47': 'png',  # PNG 파일
+    b'\x47\x49\x46\x38': 'gif',  # GIF 파일
+    b'\x42\x4D': 'bmp',          # BMP 파일
+    b'\x49\x49\x2A\x00': 'tif',  # TIFF 파일 (little-endian)
+    b'\x4D\x4D\x00\x2A': 'tif',  # TIFF 파일 (big-endian)
+    b'\x7F\x45\x4C\x46': 'elf',  # ELF 파일 (Linux 실행 파일)
+    b'\xCA\xFE\xBA\xBE': 'class', # Java 클래스 파일
+    b'\x25\x21': 'ps',           # PostScript 파일
+    b'\x52\x49\x46\x46': 'avi',  # AVI 파일
+    b'\x4F\x67\x67\x53': 'ogg',  # OGG 파일
+    b'\x1F\x8B': 'gz',           # GZIP 파일
+    b'\x42\x5A\x68': 'bz2',      # BZIP2 파일
+    b'\x37\x7A\xBC\xAF\x27\x1C': '7z', # 7-Zip 파일
+    b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1': 'doc/xls/ppt',  # MS Office (OLE Compound Document)
+    b'\x50\x4B\x03\x04': 'docx/pptx/xlsx', # Office Open XML (ZIP 기반)
+    b'\x52\x61\x72\x21\x1A\x07\x00': 'rar',  # RAR 파일
+    b'\x75\x73\x74\x61\x72': 'tar',         # TAR 파일
+    b'\x66\x4C\x61\x43': 'flac',           # FLAC 파일
+    b'\x1A\x45\xDF\xA3': 'mkv',            # Matroska 영상 파일
+    b'\x00\x00\x01\xBA': 'mpg',            # MPEG 영상 파일
+    b'\x00\x00\x01\xB3': 'mpg',            # MPEG 영상 파일
+    b'\x66\x74\x79\x70': 'mp4',            # MP4 파일
+    b'\x49\x44\x33': 'mp3',                # MP3 파일
+    b'\x52\x49\x46\x46': 'wav',            # WAV 파일
+    b'\x30\x26\xB2\x75\x8E\x66\xCF\x11': 'asf',  # ASF/WMV/WMA 파일
+    b'\x4D\x5A': 'exe',                    # EXE 실행 파일
+    b'\x25\x21': 'ps',                     # PostScript 파일
+    b'\x46\x57\x53': 'swf',                # Shockwave Flash 파일
+    b'\x52\x61\x72\x21': 'rar',            # RAR 파일 (버전 1.5 이상)
+    b'\x0A\x05\x01\x08': 'pcap',           # PCAP 파일
+    b'\x23\x21': 'sh',                     # Shell Script 파일
 }
