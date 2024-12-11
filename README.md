@@ -73,19 +73,19 @@ ZIP 파일 내의 모든 파일을 추출한 후, 다시 ZIP 파일로 압축했
 
 ## 테스트 ZIP 파일 생성
 
-테스트를 하기 위한 ZIP파일이 첨부되어 있습니다.
-- `hello.zip`
-- `helloworld.zip`
-- `encrypted.zip`
-
-위 세 파일은 제가 직접 텍스트파일을 만들고 압축하여 만든 테스트 파일입니다.
+테스트를 하기 위한 ZIP파일이 첨부되어 있습니다. 아래 3개는 직접 제작한 파일입니다.
+- `hello.zip`: hello.txt 1개가 포함된 일반적인 zip 파일
+- `helloworld.zip`: hello.txt와 world.txt 2개가 포함된 일반적인 zip 파일
+- `encrypted.zip`: hello.txt가 hello라는 패스워드로 암호화된 zip 파일
 
 아래 세 파일은 테스트를 위해 ChatGPT를 이용하여 ZIP파일을 제작하는 스크립트로 만들어졌습니다.
-- `crc.zip`
-- `hidden.zip`
-- `size.zip`
+- `crc.zip`: CRC가 변조된 zip 파일
+- `hidden.zip`: 숨겨진 데이터가 있는 zip 파일
+- `size.zip`: 압축된 파일 중 사이즈가 변조된 파일이 있는 zip 파일
+- `corrupted.zip`: 각 파트의 시그니처가 손상된 zip 파일
 
 각각 순서대로 아래의 스크립트를 실행하면 제작할 수 있습니다.
 - `CRC_corrupted_zip_maker.py`
 - `hidden_data_zip_maker.py`
 - `size_mismatch_zip_maker.py`
+- `corrupted_zip_maker.py`

@@ -125,7 +125,7 @@ def find_parts():
         if eocdr_offset == -1:                      # EOCDR 시그니처를 찾지 못했을 경우
             broken_flag = 1
             eocdr_data = -1
-            print("[!!]EOCDR signature not found.. This means that the ZIP file is corrupted.")           
+            print("\033[91m[!]EOCDR signature not found.. This means that the ZIP file is corrupted.\033[91m[!]")           
         else:                                   
             eocdr_data = file_data[eocdr_offset:]
         #print(f"EOCDR offset: {eocdr_offset}")
@@ -139,7 +139,7 @@ def find_parts():
                 if try_flag == 0: # 아예 cdfh 시그니처를 찾지 못했을 경우 - 정상적인 zip 파일이 아님
                     broken_flag = 1
                     cdfh_offsets, cdfh_datas = -1, -1
-                    print("[!!]CDFH signature not found.. This means that the ZIP file is corrupted.")
+                    print("\033[91m[!]CDFH signature not found.. This means that the ZIP file is corrupted.\033[91m[!]")
                 break
             cdfh_offsets.append(cdfh_offset)      
             cdfh_offset += len(cdfh_signature)
@@ -160,7 +160,7 @@ def find_parts():
                 if try_flag == 0: # 아예 시그니처를 찾지 못했을 경우 - 정상적인 zip 파일이 아님
                     broken_flag = 1
                     lfh_offsets, lfh_datas = -1, -1
-                    print("[!!]LFH signature not found.. This means that the ZIP file is corrupted.")
+                    print("\033[91m[!]LFH signature not found.. This means that the ZIP file is corrupted.\033[0m")
                 break
             lfh_offsets.append(lfh_offset)
             lfh_offset += len(lfh_signature)
@@ -690,6 +690,10 @@ if __name__ == '__main__':
     # 기본 파일 분석 함수 호출
     find_parts()
     hexdump()
+    if broken_flag == 1:
+        print("\033[91m[-] Error: The ZIP file is broken. The program will be terminated.\033[0m")
+        exit(1)
+        
     analysis_lfh()
     analysis_cdfh()
     analysis_eocdr()
